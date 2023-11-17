@@ -44,7 +44,7 @@ class CustomDataset(Dataset):
             qs = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + '\n' + qs
         else:
             qs = DEFAULT_IMAGE_TOKEN + '\n' + qs
-
+        
         conv = conv_templates[args.conv_mode].copy()
         conv.append_message(conv.roles[0], qs)
         conv.append_message(conv.roles[1], None)
@@ -75,9 +75,10 @@ def eval_model(args):
     model_path = os.path.expanduser(args.model_path)
     model_name = get_model_name_from_path(model_path)
     tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, args.model_base, model_name)
-
+    
     questions = [json.loads(q) for q in open(os.path.expanduser(args.question_file), "r")]
-    questions = get_chunk(questions, args.num_chunks, args.chunk_idx)
+    questions = get_chunk(questions, args.num_chunks, args.chunk_idx)    
+
     answers_file = os.path.expanduser(args.answers_file)
     os.makedirs(os.path.dirname(answers_file), exist_ok=True)
     ans_file = open(answers_file, "w")
@@ -94,7 +95,7 @@ def eval_model(args):
 
         stop_str = conv_templates[args.conv_mode].sep if conv_templates[args.conv_mode].sep_style != SeparatorStyle.TWO else conv_templates[args.conv_mode].sep2
         input_ids = input_ids.to(device='cuda', non_blocking=True)
-
+    
         with torch.inference_mode():
             output_ids = model.generate(
                 input_ids,
